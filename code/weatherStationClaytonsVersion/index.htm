@@ -1,0 +1,40 @@
+<!-- Home Page for the VML Weather Station web app -->
+<!-- Displays the most current readings from the sensors when reloaded-->
+<!-- Links to the graphs page to display the more detailed data-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VML Weather Station</title>
+    <link rel="stylesheet" href="/i_style.css">
+    <script src="ppparse.js"></script>  <!-- Papa Parse library-->
+    <script type="text/javascript" src="/index_js.js"></script>
+
+</head>
+<body>
+    <div id="header_bar">
+        <div id="title">
+            <h1>Welcome to the Arduino Weather Station</h1>
+            <h2>live from the VML</h2>
+        </div>
+        
+    </div>
+
+    <div id="content_area">
+        <div id="live_data">   
+            <h3 id="live_data_header">Current Weather</h3>
+            <!-- display most recent reading -->
+        </div>
+
+    </div>
+
+    <a href="graphs.htm" id="graphs_button">Data Graphs</a>
+    <p id="graphs_button_description">* May take some time to load *</p>
+
+    <script type="text/javascript">
+        parseData("log.csv", mainPageDisplay);
+    </script>
+    
+</body>
+</html>

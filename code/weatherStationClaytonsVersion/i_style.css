@@ -1,0 +1,96 @@
+body{
+    margin: 0px;
+}
+
+#header_bar{
+    display: inline-block;
+    height: 25%;
+    padding: 10px 5px;
+    width: 100%;
+    margin: 0px;
+    background-image: linear-gradient(
+        rgb(35, 44, 80, .3), 
+        rgb(35, 44, 80, .6));
+    background-position: top;
+    background-size: cover;
+}
+
+#title{
+    float: left;
+}
+
+#title h1{
+    margin: 0px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 40;
+    color: rgb(161, 80, 0);
+}
+
+#title h2{
+    margin: 0px;
+    font-family:'Courier New', Courier, monospace;
+    color: rgb(218, 173, 129);
+}
+
+#nav_bar{
+    float: right;
+    margin: 10px;
+}
+
+#content_area{
+    display: block;
+    height: 50%;
+}
+
+#live_data{
+    width: 400px;
+    height: 335px;
+    float: left;
+    padding: 5px;
+    margin: .5% 34%;
+    background-color: rgb(35, 44, 80, .3);
+    border-radius: 10px;
+    
+}
+
+#live_data_header{
+    margin: 5px 0px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: rgb(161, 80, 0);
+
+}
+
+#curr_weather{
+    float:left;
+    padding: 0px 10px;
+    margin: 0px;
+}
+
+#curr_weather li{
+    list-style-type: none;
+    margin-top: 5px;
+    font-family:'Courier New', Courier, monospace;
+}
+
+#curr_wind_heading, #curr_PM_2_5, #curr_PM_10, #curr_AQI{
+    margin: 5px 25px;
+} 
+
+#graphs_button{
+    background-color: rgb(218, 173, 129);
+    text-decoration: none;
+    color: black;
+    padding: 5px;
+    border-radius: 10px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0% 42%;
+}
+
+#graphs_button:hover{
+    background-color: rgb(161, 80, 0);
+}
+
+#graphs_button_description{
+    float: left;
+    margin: .5% 38.5%;
+}

@@ -1,0 +1,52 @@
+<!-- Graphs Page for the VML Weather Station web app -->
+<!-- Displays the most current readings from the sensors when reloaded, as well as buttons to display graphs of the readings over time for each sensor-->
+<!-- May take some time to load due to the ApexCharts library-->
+<!-- Links to the home page-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Station Graphs</title>
+
+    <link rel="stylesheet" href="/g_style.css">
+    <script src="ppparse.js"></script> <!-- Papa Parse library -->
+    <script src="charts.js"></script> <!-- ApexCharts library-->
+    <script type="text/javascript" src="/graph_js.js"></script>
+</head>
+<body>
+
+    <a href="index.htm" id="index_button">Home Page</a>
+
+    <div id="live_data">   
+        <h3 id="live_data_header">Current Weather</h3>
+        <!-- display most recent reading -->
+    </div>
+
+    <h3 id="graph_header">Data Trends</h3>
+    <p id="graph_instructions">Select an attribute below to view a graph of the data</p>
+    
+    <div id="data_graphs">   
+        <ul id="buttons">
+            <li id="tempButton">Temperature</li>
+            <li id="pressureButton">Air Pressure</li>
+            <li id="humidityButton">Humidity</li>
+            <li id="aqiButton">Air Quality Index</li>
+            <li id="airQuality2.5Button">PM 2.5</li>
+            <li id="airQuality10Button">PM 10</li>
+            <li id="windSpeedButton">Wind Speed</li>
+            <li id="windHeadingButton">Wind Heading</li>
+            <li id="rainRateButton">Rain Rate</li>
+        </ul>
+
+        <div id="graph"></div>
+
+    </div>
+
+    <script type="text/javascript">
+        parseData("log.csv", containerFunction);
+    </script>
+
+    
+</body>
+</html>
