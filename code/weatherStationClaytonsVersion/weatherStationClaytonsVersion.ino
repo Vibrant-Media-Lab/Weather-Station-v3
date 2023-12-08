@@ -23,6 +23,7 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <LiquidCrystal_I2C.h>
+#include "RTClib.h"
 
 // Component Declarations //
 SoftwareSerial airQualitySerial(14, 15);
@@ -99,12 +100,11 @@ char req_index = 0;              // index into HTTP_req buffer
 String readString;  // used to store and print GET requests, for debugging
 
 // Timing //
-unsigned long frameStart;
-unsigned long frameLength;
+RTC_PCF8523 rtc;
 
-long _dataUpdateTime;
-long _dataWriteTime;
-long _dataUploadTime;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+DateTime now;
 
 // Flags //
 bool hasSi;
@@ -123,36 +123,24 @@ void setup() {
   beginSD();
   beginEnet();
   beginSensors();
+  beginRTC();
   prepareLCD();
   updateData();
 }
 
 void loop() {
-  frameStart = millis();
+  now = rtc.now();
 
-  if(_dataUpdateTime <= 0) {
+  if(now.minute() == 0 && now.second() == 0){
     updateData();
-    Serial.println("");
-    _dataUpdateTime = dataUpdateTime;
+    if(hasSD) writeToSD();
   }
 
-  if(_dataWriteTime <= 0) {
-    if(hasSD) writeToSD();
-    _dataWriteTime = dataWriteTime;
-  }
 
   // find client and serve them the web page
   findEthernetClient();
 
-  long delayTime = 1000 - (millis() - frameStart);
-  if(delayTime > 0) delay(delayTime);
-  //End of frame operations
-  if(millis() >= frameStart) frameLength = millis() - frameStart;
-  else frameLength = millis() + (unsigned long)(0x7FFFFFFF - frameStart);
-
-  _dataUploadTime -= frameLength;
-  _dataWriteTime -= frameLength;
-  _dataUpdateTime -= frameLength;
+  delay(1000);
 }
 
 // Initialize Components //
@@ -214,6 +202,34 @@ void beginEnet() {
 
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
+
+}
+
+/**
+Set up RTC
+**/
+void beginRTC() {
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+
+  if (! rtc.initialized() || rtc.lostPower()) {
+    Serial.println("RTC is NOT initialized, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
+  // When time needs to be re-set on a previously configured device, the
+  // following line sets the RTC to the date & time this sketch was compiled
+  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+ 
+  // When the RTC was stopped and stays connected to the battery, it has
+  // to be restarted by clearing the STOP bit. Let's do this to ensure
+  // the RTC is running.
+  rtc.start();
 
 }
 
