@@ -46,11 +46,6 @@ const int displayScreens = 4; //Specifies the number of different display screen
 
 #define REQ_BUF_SZ   20   // Used for handling GET requests from clients
 
-// Aliases and Definitions //
-#define dataUpdateTime 10000
-#define dataWriteTime 60000
-#define dataUploadTime 360000
-
 typedef struct pms5003data {
   uint16_t framelen;
   uint16_t pm10_standard, pm25_standard, pm100_standard;
@@ -84,11 +79,19 @@ weatherdata_t data;
 
 int windInterruptCounter;
 int windInterruptBounce;
+
 int raininterruptCounter;
+int rainInterruptBounce;
 
 float ignitionComponent;
 float rain24Hrs;
 float rainYear;
+
+volatile float rainHr = 0;
+volatile float rain24Hr = 0;
+const float volumePerRainTip = 0.00787401575; //Volume of water that will cause a tip in the rain sensor, should be calibrated
+const int rainBounceMin = 500; //Min amount of time in millis that a rain tip must wait after its predecessor to be counted
+volatile float lastRainTip = millis();
 
 String serializedData, timeStamp;
 File logFile;
@@ -125,6 +128,9 @@ void setup() {
   beginSensors();
   beginRTC();
   prepareLCD();
+
+  attachInterrupt(digitalPinToInterrupt(rainRatePin), rainTip, FALLING);
+
   updateData();
 }
 
@@ -134,13 +140,12 @@ void loop() {
   if(now.minute() == 0 && now.second() == 0){
     updateData();
     if(hasSD) writeToSD();
+    delay(1000);
   }
 
 
   // find client and serve them the web page
   findEthernetClient();
-
-  delay(1000);
 }
 
 // Initialize Components //
@@ -242,6 +247,10 @@ void beginRTC() {
 void beginSensors() {
 	hasSi = temperatureSensor.begin();
 	hasBmp = pressureSensor.begin();
+
+    //Properly specifies the pins to be used for rain ticks and wind ticks, and reserves them for interrupts
+    pinMode(rainRatePin, INPUT_PULLUP);
+    pinMode(windSpeedPin, INPUT_PULLUP); 
 }
 
 /**
@@ -284,6 +293,20 @@ void printDirectory(File dir, int numTabs) {
    }
 }
 
+// Interrupt functions for rain rate and wind speed //
+
+/**
+* Interrupt function to be called whenever the rain gauge is tipped, updates the rain fall totals
+**/
+void rainTip(){
+  if(millis() - lastRainTip > rainBounceMin){
+    rainHr += volumePerRainTip;
+    rain24Hr += volumePerRainTip;
+
+    lastRainTip = millis();
+  }
+}
+
 // Updata Data fields //
 
 /**
@@ -297,6 +320,7 @@ void updateData() {
   if(hasSi) updateHumidity();
   updateWindHeading();
   updateWindSpeed();
+  updateRainRate();
   updateParticulateMatter();
   updateAirQualityIndex();
   updateFireSafetyRating();
@@ -462,7 +486,6 @@ void updateWindHeading() {
 void updateWindSpeed() {
   windInterruptCounter = 0;
   
-  pinMode(windSpeedPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(windSpeedPin), isr_rotation, FALLING);
   
   int i = 1000;
@@ -473,6 +496,11 @@ void updateWindSpeed() {
   
   detachInterrupt(digitalPinToInterrupt(windSpeedPin));
   data.windSpeed = windInterruptCounter * .75;
+}
+
+void updateRainRate(){
+  data.rainRate = rainHr;
+  rainHr = 0;
 }
 
 void updateFireSafetyRating() {
@@ -531,6 +559,19 @@ void isr_rotation() {
  //CSV over text file because ensures more uniform formatting
 void writeToSD() {
   logFile = SD.open("log.csv", FILE_WRITE);
+
+  logFile.print(now.year(), DEC);
+  logFile.print("-");
+  logFile.print(now.month(), DEC);
+  logFile.print("-");
+  logFile.print(now.day(), DEC);
+  logFile.print(" ");
+  logFile.print(now.hour(), DEC);
+  logFile.print(":");
+  logFile.print(now.minute(), DEC);
+  logFile.print(":");
+  logFile.print(now.second(), DEC);
+  logFile.print(",");
 
   logFile.print(data.temperature);
   logFile.print(",");
