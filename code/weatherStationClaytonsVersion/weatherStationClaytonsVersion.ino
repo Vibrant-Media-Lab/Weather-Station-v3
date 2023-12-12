@@ -71,9 +71,23 @@ typedef struct weatherdata_t {
   String aqiLabel;
 } weatherdata_t;
 
+typedef struct dailydata_t {
+  float high_temp;
+  float low_temp;
+  float avg_pressure;
+  float high_humidity;
+  float high_aqi;
+  float avg_windSpeed;
+  float total_rainRate;
+  String worst_fireSafetyRating;
+  String worst_aqiLabel;
+} dailydata_t;
+
 // Global Data Variables //
 airqualitydata_t aq;
 weatherdata_t data;
+dailydata_t dailyData;
+dailydata_t prevDailyData;
 
 #define windHeadingOffset 0
 
@@ -315,6 +329,8 @@ void rainTip(){
  * Return: None
  */
 void updateData() {
+
+  // update the hourly data readings
   if(hasSi || hasBmp) updateTemperature();
   if(hasBmp) updatePressure();
   if(hasSi) updateHumidity();
@@ -324,6 +340,98 @@ void updateData() {
   updateParticulateMatter();
   updateAirQualityIndex();
   updateFireSafetyRating();
+
+  //update the daily data readings
+
+  now = rtc.now();
+
+  // at midnight, move the previous day's values to the stored struct so they stay consistent throughout the next day, then clear the updating struct to calculate the new days values
+  if (now.hour() == 0){
+
+    // copy the end of day values of the daily data
+    float prevHighTemp = dailyData.high_temp;
+    float prevLowTemp = dailyData.low_temp;
+    float prevAvgPressure = dailyData.avg_pressure;
+    float prevHighHumidity = dailyData.high_humidity;
+    float prevHighAQI = dailyData.high_aqi;
+    float prevAvgWindSpeed = dailyData.avg_windSpeed;
+    float prevTotalRain = dailyData.total_rainRate;
+    String prevWorstFireRating = dailyData.worst_fireSafetyRating;
+    String prevWorstAQILabel = dailyData.worst_aqiLabel;
+
+    // store the previous day's values
+    prevDailyData.high_temp = prevHighTemp;
+    prevDailyData.low_temp = prevLowTemp;
+    prevDailyData.avg_pressure = prevAvgPressure;
+    prevDailyData.high_humidity = prevHighHumidity;
+    prevDailyData.high_aqi = prevHighAQI;
+    prevDailyData.avg_windSpeed = prevAvgWindSpeed;
+    prevDailyData.total_rainRate = prevTotalRain;
+    prevDailyData.worst_fireSafetyRating = prevWorstFireRating;
+    prevDailyData.worst_aqiLabel = prevWorstAQILabel;
+
+    // clear the previous day's data
+    dailyData.high_temp = data.temperature;
+    dailyData.low_temp = data.temperature;
+    dailyData.avg_pressure = data.pressure;
+    dailyData.high_humidity = data.humidity;
+    dailyData.high_aqi = data.aqi;
+    dailyData.avg_windSpeed = data.windSpeed;
+    dailyData.total_rainRate = data.rainRate;
+    dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    dailyData.worst_aqiLabel = data.aqiLabel;
+
+  }
+  else {
+  //update the daily values each hour: 
+    int currentHour = now.hour(); // the number of values currently included in the calculations
+    int total = currentHour + 1; // the new value to use for calculating averages
+
+    // high temperature
+    if (data.temperature > dailyData.high_temp){
+      dailyData.high_temp = data.temperature;
+    }
+
+    // low temperature
+    if (data.temperature < dailyData.low_temp){
+      dailyData.low_temp = data.temperature;
+    }
+
+    // average air pressure
+    dailyData.avg_pressure = ((dailyData.avg_pressure * currentHour) + data.pressure) / total;
+
+    // highest humidity
+    if (data.humidity > dailyData.high_humidity){
+      dailyData.high_humidity = data.humidity;
+    }
+
+    // worst air quality and AQI label
+    if (data.aqi > dailyData.high_aqi){
+      dailyData.high_aqi = data.aqi;
+      dailyData.worst_aqiLabel = data.aqiLabel;
+    }
+
+    // average wind speed
+    dailyData.avg_windSpeed = ((dailyData.avg_windSpeed * currentHour) + data.windSpeed) / total;
+
+    // total rain fall
+    dailyData.total_rainRate += data.rainRate;
+
+    // worst fire safety rating
+    if (data.fireSafetyRating == "VERY LOW"){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if(data.fireSafetyRating == "LOW" && dailyData.worst_fireSafetyRating != "VERY LOW"){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if (data.fireSafetyRating == "MODERATE" && (dailyData.worst_fireSafetyRating != "LOW" && dailyData.worst_fireSafetyRating != "VERY LOW")){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if (data.fireSafetyRating == "HIGH" && (dailyData.worst_fireSafetyRating == "VERY HIGH" )){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+  }
+  
 }
 
 /**
@@ -547,6 +655,7 @@ void isr_rotation() {
     windInterruptBounce = millis();
   }
 }
+
 
 // Data Packaging and Output //
 
