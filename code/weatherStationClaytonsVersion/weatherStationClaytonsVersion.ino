@@ -23,6 +23,7 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <LiquidCrystal_I2C.h>
+#include "RTClib.h"
 
 // Component Declarations //
 SoftwareSerial airQualitySerial(14, 15);
@@ -44,11 +45,6 @@ const int displayScreens = 4; //Specifies the number of different display screen
 #define SD_CARD_SS_PIN (4)
 
 #define REQ_BUF_SZ   20   // Used for handling GET requests from clients
-
-// Aliases and Definitions //
-#define dataUpdateTime 10000
-#define dataWriteTime 60000
-#define dataUploadTime 360000
 
 typedef struct pms5003data {
   uint16_t framelen;
@@ -75,19 +71,41 @@ typedef struct weatherdata_t {
   String aqiLabel;
 } weatherdata_t;
 
+typedef struct dailydata_t {
+  float high_temp;
+  float low_temp;
+  float avg_pressure;
+  float high_humidity;
+  float high_aqi;
+  float avg_windSpeed;
+  float total_rainRate;
+  String worst_fireSafetyRating;
+  String worst_aqiLabel;
+} dailydata_t;
+
 // Global Data Variables //
 airqualitydata_t aq;
 weatherdata_t data;
+dailydata_t dailyData;
+dailydata_t prevDailyData;
 
 #define windHeadingOffset 0
 
 int windInterruptCounter;
 int windInterruptBounce;
+
 int raininterruptCounter;
+int rainInterruptBounce;
 
 float ignitionComponent;
 float rain24Hrs;
 float rainYear;
+
+volatile float rainHr = 0;
+volatile float rain24Hr = 0;
+const float volumePerRainTip = 0.00787401575; //Volume of water that will cause a tip in the rain sensor, should be calibrated
+const int rainBounceMin = 500; //Min amount of time in millis that a rain tip must wait after its predecessor to be counted
+volatile float lastRainTip = millis();
 
 String serializedData, timeStamp;
 File logFile;
@@ -99,12 +117,11 @@ char req_index = 0;              // index into HTTP_req buffer
 String readString;  // used to store and print GET requests, for debugging
 
 // Timing //
-unsigned long frameStart;
-unsigned long frameLength;
+RTC_PCF8523 rtc;
 
-long _dataUpdateTime;
-long _dataWriteTime;
-long _dataUploadTime;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+DateTime now;
 
 // Flags //
 bool hasSi;
@@ -123,36 +140,26 @@ void setup() {
   beginSD();
   beginEnet();
   beginSensors();
+  beginRTC();
   prepareLCD();
+
+  attachInterrupt(digitalPinToInterrupt(rainRatePin), rainTip, FALLING);
+
   updateData();
 }
 
 void loop() {
-  frameStart = millis();
+  now = rtc.now();
 
-  if(_dataUpdateTime <= 0) {
+  if(now.minute() == 0 && now.second() == 0){
     updateData();
-    Serial.println("");
-    _dataUpdateTime = dataUpdateTime;
+    if(hasSD) writeToSD();
+    delay(1000);
   }
 
-  if(_dataWriteTime <= 0) {
-    if(hasSD) writeToSD();
-    _dataWriteTime = dataWriteTime;
-  }
 
   // find client and serve them the web page
   findEthernetClient();
-
-  long delayTime = 1000 - (millis() - frameStart);
-  if(delayTime > 0) delay(delayTime);
-  //End of frame operations
-  if(millis() >= frameStart) frameLength = millis() - frameStart;
-  else frameLength = millis() + (unsigned long)(0x7FFFFFFF - frameStart);
-
-  _dataUploadTime -= frameLength;
-  _dataWriteTime -= frameLength;
-  _dataUpdateTime -= frameLength;
 }
 
 // Initialize Components //
@@ -218,6 +225,34 @@ void beginEnet() {
 }
 
 /**
+Set up RTC
+**/
+void beginRTC() {
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+
+  if (! rtc.initialized() || rtc.lostPower()) {
+    Serial.println("RTC is NOT initialized, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
+  // When time needs to be re-set on a previously configured device, the
+  // following line sets the RTC to the date & time this sketch was compiled
+  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+ 
+  // When the RTC was stopped and stays connected to the battery, it has
+  // to be restarted by clearing the STOP bit. Let's do this to ensure
+  // the RTC is running.
+  rtc.start();
+
+}
+
+/**
  * Attemts to open attached sensors for future data measurement. Sets a series of global flags
  * based on which are present and which data metrics can be read.
  * Arguments: None
@@ -226,6 +261,10 @@ void beginEnet() {
 void beginSensors() {
 	hasSi = temperatureSensor.begin();
 	hasBmp = pressureSensor.begin();
+
+    //Properly specifies the pins to be used for rain ticks and wind ticks, and reserves them for interrupts
+    pinMode(rainRatePin, INPUT_PULLUP);
+    pinMode(windSpeedPin, INPUT_PULLUP); 
 }
 
 /**
@@ -268,6 +307,20 @@ void printDirectory(File dir, int numTabs) {
    }
 }
 
+// Interrupt functions for rain rate and wind speed //
+
+/**
+* Interrupt function to be called whenever the rain gauge is tipped, updates the rain fall totals
+**/
+void rainTip(){
+  if(millis() - lastRainTip > rainBounceMin){
+    rainHr += volumePerRainTip;
+    rain24Hr += volumePerRainTip;
+
+    lastRainTip = millis();
+  }
+}
+
 // Updata Data fields //
 
 /**
@@ -276,14 +329,109 @@ void printDirectory(File dir, int numTabs) {
  * Return: None
  */
 void updateData() {
+
+  // update the hourly data readings
   if(hasSi || hasBmp) updateTemperature();
   if(hasBmp) updatePressure();
   if(hasSi) updateHumidity();
   updateWindHeading();
   updateWindSpeed();
+  updateRainRate();
   updateParticulateMatter();
   updateAirQualityIndex();
   updateFireSafetyRating();
+
+  //update the daily data readings
+
+  now = rtc.now();
+
+  // at midnight, move the previous day's values to the stored struct so they stay consistent throughout the next day, then clear the updating struct to calculate the new days values
+  if (now.hour() == 0){
+
+    // copy the end of day values of the daily data
+    float prevHighTemp = dailyData.high_temp;
+    float prevLowTemp = dailyData.low_temp;
+    float prevAvgPressure = dailyData.avg_pressure;
+    float prevHighHumidity = dailyData.high_humidity;
+    float prevHighAQI = dailyData.high_aqi;
+    float prevAvgWindSpeed = dailyData.avg_windSpeed;
+    float prevTotalRain = dailyData.total_rainRate;
+    String prevWorstFireRating = dailyData.worst_fireSafetyRating;
+    String prevWorstAQILabel = dailyData.worst_aqiLabel;
+
+    // store the previous day's values
+    prevDailyData.high_temp = prevHighTemp;
+    prevDailyData.low_temp = prevLowTemp;
+    prevDailyData.avg_pressure = prevAvgPressure;
+    prevDailyData.high_humidity = prevHighHumidity;
+    prevDailyData.high_aqi = prevHighAQI;
+    prevDailyData.avg_windSpeed = prevAvgWindSpeed;
+    prevDailyData.total_rainRate = prevTotalRain;
+    prevDailyData.worst_fireSafetyRating = prevWorstFireRating;
+    prevDailyData.worst_aqiLabel = prevWorstAQILabel;
+
+    // clear the previous day's data
+    dailyData.high_temp = data.temperature;
+    dailyData.low_temp = data.temperature;
+    dailyData.avg_pressure = data.pressure;
+    dailyData.high_humidity = data.humidity;
+    dailyData.high_aqi = data.aqi;
+    dailyData.avg_windSpeed = data.windSpeed;
+    dailyData.total_rainRate = data.rainRate;
+    dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    dailyData.worst_aqiLabel = data.aqiLabel;
+
+  }
+  else {
+  //update the daily values each hour: 
+    int currentHour = now.hour(); // the number of values currently included in the calculations
+    int total = currentHour + 1; // the new value to use for calculating averages
+
+    // high temperature
+    if (data.temperature > dailyData.high_temp){
+      dailyData.high_temp = data.temperature;
+    }
+
+    // low temperature
+    if (data.temperature < dailyData.low_temp){
+      dailyData.low_temp = data.temperature;
+    }
+
+    // average air pressure
+    dailyData.avg_pressure = ((dailyData.avg_pressure * currentHour) + data.pressure) / total;
+
+    // highest humidity
+    if (data.humidity > dailyData.high_humidity){
+      dailyData.high_humidity = data.humidity;
+    }
+
+    // worst air quality and AQI label
+    if (data.aqi > dailyData.high_aqi){
+      dailyData.high_aqi = data.aqi;
+      dailyData.worst_aqiLabel = data.aqiLabel;
+    }
+
+    // average wind speed
+    dailyData.avg_windSpeed = ((dailyData.avg_windSpeed * currentHour) + data.windSpeed) / total;
+
+    // total rain fall
+    dailyData.total_rainRate += data.rainRate;
+
+    // worst fire safety rating
+    if (data.fireSafetyRating == "VERY LOW"){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if(data.fireSafetyRating == "LOW" && dailyData.worst_fireSafetyRating != "VERY LOW"){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if (data.fireSafetyRating == "MODERATE" && (dailyData.worst_fireSafetyRating != "LOW" && dailyData.worst_fireSafetyRating != "VERY LOW")){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+    else if (data.fireSafetyRating == "HIGH" && (dailyData.worst_fireSafetyRating == "VERY HIGH" )){
+      dailyData.worst_fireSafetyRating = data.fireSafetyRating;
+    }
+  }
+  
 }
 
 /**
@@ -446,7 +594,6 @@ void updateWindHeading() {
 void updateWindSpeed() {
   windInterruptCounter = 0;
   
-  pinMode(windSpeedPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(windSpeedPin), isr_rotation, FALLING);
   
   int i = 1000;
@@ -457,6 +604,11 @@ void updateWindSpeed() {
   
   detachInterrupt(digitalPinToInterrupt(windSpeedPin));
   data.windSpeed = windInterruptCounter * .75;
+}
+
+void updateRainRate(){
+  data.rainRate = rainHr;
+  rainHr = 0;
 }
 
 void updateFireSafetyRating() {
@@ -504,6 +656,7 @@ void isr_rotation() {
   }
 }
 
+
 // Data Packaging and Output //
 
 /**
@@ -515,6 +668,19 @@ void isr_rotation() {
  //CSV over text file because ensures more uniform formatting
 void writeToSD() {
   logFile = SD.open("log.csv", FILE_WRITE);
+
+  logFile.print(now.year(), DEC);
+  logFile.print("-");
+  logFile.print(now.month(), DEC);
+  logFile.print("-");
+  logFile.print(now.day(), DEC);
+  logFile.print(" ");
+  logFile.print(now.hour(), DEC);
+  logFile.print(":");
+  logFile.print(now.minute(), DEC);
+  logFile.print(":");
+  logFile.print(now.second(), DEC);
+  logFile.print(",");
 
   logFile.print(data.temperature);
   logFile.print(",");
