@@ -7,9 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VML Weather Station</title>
-    <link rel="stylesheet" href="/static/css/i_style.css">
-    <script src="/static/libraries/ppparse.js"></script>  <!-- Papa Parse library-->
-    <script type="text/javascript" src="/static/js/index_js.js"></script>
+    <link rel="stylesheet" href="static/css/i_style.css">
+    <script src="static/libraries/ppparse.js"></script>  <!-- Papa Parse library-->
+    <script type="text/javascript" src="static/js/index_js.js"></script>
 
 </head>
 <body>
@@ -22,9 +22,14 @@
     </div>
 
     <div id="content_area">
-        <div id="live_data">   
-            <h3 id="live_data_header">Current Weather</h3>
+        <div id="hourly_live_data">   
+            <h3 id="hourly_live_data_header">Current Weather</h3>
             <!-- display most recent reading -->
+        </div>
+
+        <div id="prev_day_data">
+            <h3 id="prev_day_data_header">Previous Day's Weather</h3>
+            <!-- display weather from the previous day-->
         </div>
 
     </div>

@@ -42,37 +42,37 @@ body{
     height: 50%;
 }
 
-#live_data{
-    width: 400px;
-    height: 335px;
+#hourly_live_data, #prev_day_data{
     float: left;
+    width: 35%;
+    height: 335px;
     padding: 5px;
-    margin: .5% 34%;
+    margin: 6.25%;
     background-color: rgb(35, 44, 80, .3);
     border-radius: 10px;
     
 }
 
-#live_data_header{
+#hourly_live_data_header, #prev_day_data_header{
     margin: 5px 0px;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: rgb(161, 80, 0);
 
 }
 
-#curr_weather{
+#curr_weather, #daily_weather{
     float:left;
     padding: 0px 10px;
     margin: 0px;
 }
 
-#curr_weather li{
+#curr_weather li, #daily_weather li{
     list-style-type: none;
     margin-top: 5px;
     font-family:'Courier New', Courier, monospace;
 }
 
-#curr_wind_heading, #curr_PM_2_5, #curr_PM_10, #curr_AQI{
+#curr_wind_heading, #curr_PM_2_5, #curr_PM_10, #curr_AQI, #high_AQI{
     margin: 5px 25px;
 } 
 
@@ -80,10 +80,10 @@ body{
     background-color: rgb(218, 173, 129);
     text-decoration: none;
     color: black;
-    padding: 5px;
+    padding: 5px 20px;
     border-radius: 10px;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0% 42%;
+    margin: 0% 44%;
 }
 
 #graphs_button:hover{
@@ -92,5 +92,6 @@ body{
 
 #graphs_button_description{
     float: left;
-    margin: .5% 38.5%;
+    margin: .5% 41%;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
