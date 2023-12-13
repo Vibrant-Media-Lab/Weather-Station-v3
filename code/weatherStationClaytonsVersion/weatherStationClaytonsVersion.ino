@@ -703,7 +703,24 @@ void writeToSD() {
 	logFile.print(data.rainRate);
   logFile.print(",");
 	logFile.print(data.fireSafetyRating);
-
+  logFile.print(",");
+  logFile.print(dailyData.high_temp);
+  logFile.print(",");
+  logFile.print(dailyData.low_temp);
+  logFile.print(",");
+  logFile.print(dailyData.avg_pressure);
+  logFile.print(",");
+  logFile.print(dailyData.high_humidity);
+  logFile.print(",");
+  logFile.print(dailyData.high_aqi);
+  logFile.print(",");
+  logFile.print(dailyData.avg_windSpeed);
+  logFile.print(",");
+  logFile.print(dailyData.total_rainRate);
+  logFile.print(",");
+  logFile.print(dailyData.worst_fireSafetyRating);
+  logFile.print(",");
+  logFile.print(dailyData.worst_aqiLabel);
 
   logFile.println("");
   logFile.flush();
