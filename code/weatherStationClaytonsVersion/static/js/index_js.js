@@ -38,12 +38,12 @@ function displayCurrentData(data) {
     }
     */
 
-    // create ul
+    // create ul for hourly data
     let currWeather = document.createElement("ul");
     currWeather.id = "curr_weather";
 
     // add currWeather to the DOM
-    let currWeatherParent = document.getElementById("live_data");
+    let currWeatherParent = document.getElementById("hourly_live_data");
     currWeatherParent.appendChild(currWeather);
 
     // for each sensor measurement, create an li element, set the id and the innerText, and add it to the DOM
@@ -82,7 +82,6 @@ function displayCurrentData(data) {
     currPM10.innerText = `PM 10: ${data[current_data_index]["pm10"]} \u00B5g/m3`;
     currWeather.appendChild(currPM10);
 
-
     let currWindSpeed = document.createElement("li");
     currWindSpeed.id = "curr_wind_speed";
     currWindSpeed.innerText = `Wind Speed: ${data[current_data_index]["wind_speed"]} mph`;
@@ -102,4 +101,60 @@ function displayCurrentData(data) {
     currFireSafety.id = "curr_fire_safety";
     currFireSafety.innerText = `Fire Safety Rating: ${data[current_data_index]["fire_safety_rating"]}`;
     currWeather.appendChild(currFireSafety);
+
+
+    // create ul for daily data
+    let dailyWeather = document.createElement("ul");
+    dailyWeather.id = "daily_weather";
+
+    // add dailyWeather to the DOM
+    let dailyWeatherParent = document.getElementById("prev_day_data");
+    dailyWeatherParent.appendChild(dailyWeather);
+
+    // for each sensor measurement, create an li element, set the id and the innerText, and add it to the DOM
+    let highTemp = document.createElement("li");
+    highTemp.id = "high_temp";
+    highTemp.innerText = `High Temperature: ${data[current_data_index]["prev_day_high_temp"]} \u00B0C`;
+    dailyWeather.appendChild(highTemp);
+
+    let lowTemp = document.createElement("li");
+    lowTemp.id = "low_temp";
+    lowTemp.innerText = `Low Temperature: ${data[current_data_index]["prev_day_low_temp"]} \u00B0C`;
+    dailyWeather.appendChild(lowTemp);
+
+    let avgPressure = document.createElement("li");
+    avgPressure.id = "avg_pressure";
+    avgPressure.innerText = `Average Air Pressure: ${data[current_data_index]["prev_day_avg_pressure"]} Pa`;
+    dailyWeather.appendChild(avgPressure);
+
+    let highHumidity = document.createElement("li");
+    highHumidity.id = "high_humidity";
+    highHumidity.innerText = `High Humidity: ${data[current_data_index]["prev_day_high_humidity"]} %`;
+    dailyWeather.appendChild(highHumidity);
+
+    let worstAQILabel = document.createElement("li");
+    worstAQILabel.id = "worst_AQI_label";
+    worstAQILabel.innerText = `Worst Air Quality Index (AQI) Level: ${data[current_data_index]["prev_day_worst_aqi_label"]}`;
+    dailyWeather.appendChild(worstAQILabel);
+
+    let highAQI = document.createElement("li");
+    highAQI.id = "high_AQI";
+    highAQI.innerText = `Highest Air Quality Index (AQI): ${data[current_data_index]["prev_day_high_aqi"]}`;
+    dailyWeather.appendChild(highAQI);    
+
+    let avgWindSpeed = document.createElement("li");
+    avgWindSpeed.id = "avg_wind_speed";
+    avgWindSpeed.innerText = `Average Wind Speed: ${data[current_data_index]["prev_day_avg_wind_speed"]} mph`;
+    dailyWeather.appendChild(avgWindSpeed);
+
+    let totRainRate = document.createElement("li");
+    totRainRate.id = "tot_rain_rate";
+    totRainRate.innerText = `Total Rain Fall: ${data[current_data_index]["prev_day_total_rain"]} inches`;
+    dailyWeather.appendChild(totRainRate);
+
+    let worstFireSafety = document.createElement("li");
+    worstFireSafety.id = "worst_fire_safety";
+    worstFireSafety.innerText = `Lowest Fire Safety Rating: ${data[current_data_index]["prev_day_worst_fire_safety"]}`;
+    dailyWeather.appendChild(worstFireSafety);
+
 }
