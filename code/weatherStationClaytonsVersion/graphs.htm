@@ -15,19 +15,19 @@
     <script type="text/javascript" src="static/js/graph_js.js"></script>
 </head>
 <body>
-
-    <a href="index.htm" id="index_button">Home Page</a>
-
-    <div id="live_data">   
-        <h3 id="live_data_header">Current Weather</h3>
-        <!-- display most recent reading -->
+    <div id="header_bar">
+        <div id="title">
+            <h1>Welcome to the Arduino Weather Station</h1>
+            <h2>data trends</h2>
+        </div>
+        <a href="index.htm" id="index_button">Back to Home Page</a>
     </div>
 
-    <h3 id="graph_header">Data Trends</h3>
     <p id="graph_instructions">Select an attribute below to view a graph of the data</p>
     
-    <div id="data_graphs">   
-        <ul id="buttons">
+    <div id="data_graphs">
+        <h4>Hourly Data:</h4>   
+        <ul id="curr_weather_buttons">
             <li id="tempButton">Temperature</li>
             <li id="pressureButton">Air Pressure</li>
             <li id="humidityButton">Humidity</li>
@@ -35,8 +35,17 @@
             <li id="airQuality2.5Button">PM 2.5</li>
             <li id="airQuality10Button">PM 10</li>
             <li id="windSpeedButton">Wind Speed</li>
-            <li id="windHeadingButton">Wind Heading</li>
-            <li id="rainRateButton">Rain Rate</li>
+            <li id="rainRateButton">Rain Fall</li>
+        </ul>
+        <h4>Daily Data:</h4>
+        <ul id="daily_weather_buttons">
+            <li id="highTempButton">High Temperature</li>
+            <li id="lowTempButton">Low Temperature</li>
+            <li id="avgPressureButton">Average Air Pressure</li>
+            <li id="highHumidityButton">High Humidity</li>
+            <li id="highAqiButton">High AQI</li>
+            <li id="avgWindSpeedButton">Average Wind Speed</li>
+            <li id="totRainButton">Total Rain Fall</li>
         </ul>
 
         <div id="graph"></div>

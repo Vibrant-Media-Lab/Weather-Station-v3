@@ -1,3 +1,12 @@
+// set timer to auto refresh the page once every hour to display the most recent data
+var timeout = 3600000;
+window.setTimeout(poller, timeout);
+
+function poller() {
+    window.location = "http://192.168.1.12";    //URL will need to be updated to match where the web page is hosted 
+    window.setTimeout(poller, timeout);
+}
+
 // use the Papa Parse library to parse data from csv format on SD card to JSON object usable for webpage
 // arguments: log file, callback function
 // returns: nothing
@@ -38,12 +47,22 @@ function displayCurrentData(data) {
     }
     */
 
+    // display most recent date and time for the data
+    let currTime = document.createElement("h5");
+    currTime.id = "curr_time";
+
+    let timestamp = `${data[current_data_index]["timestamp"]}`;
+    timestamp = timestamp.split(" ");
+
+    currTime.innerText = `Data collected at ${timestamp[1]} on ${timestamp[0]}`;
+
     // create ul for hourly data
     let currWeather = document.createElement("ul");
     currWeather.id = "curr_weather";
 
     // add currWeather to the DOM
     let currWeatherParent = document.getElementById("hourly_live_data");
+    currWeatherParent.appendChild(currTime);
     currWeatherParent.appendChild(currWeather);
 
     // for each sensor measurement, create an li element, set the id and the innerText, and add it to the DOM
@@ -103,12 +122,19 @@ function displayCurrentData(data) {
     currWeather.appendChild(currFireSafety);
 
 
+    // display the previous date when the daily data collected
+    let prevDay = document.createElement("h5");
+    prevDay.id = "prev_day";
+
+    prevDay.innerText = `Data collected on ${data[current_data_index]["prev_date"]}`;
+
     // create ul for daily data
     let dailyWeather = document.createElement("ul");
     dailyWeather.id = "daily_weather";
 
     // add dailyWeather to the DOM
     let dailyWeatherParent = document.getElementById("prev_day_data");
+    dailyWeatherParent.appendChild(prevDay);
     dailyWeatherParent.appendChild(dailyWeather);
 
     // for each sensor measurement, create an li element, set the id and the innerText, and add it to the DOM

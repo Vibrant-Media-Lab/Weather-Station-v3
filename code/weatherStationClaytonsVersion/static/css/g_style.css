@@ -4,13 +4,13 @@ body{
 
 #header_bar{
     display: inline-block;
-    height: 25%;
+    height: 20%;
     padding: 10px 5px;
     width: 100%;
     margin: 0px;
     background-image: linear-gradient(
-        rgb(35, 44, 80, .3), 
-        rgb(35, 44, 80, .6));
+        rgb(35, 44, 80, .4),
+        rgb(35, 44, 80, .8));
     background-position: top;
     background-size: cover;
 }
@@ -20,105 +20,16 @@ body{
 }
 
 #title h1{
-    margin: 0px;
+    margin: 50px 0px 0px 0px;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 40;
     color: rgb(161, 80, 0);
 }
 
 #title h2{
-    margin: 0px;
+    margin: 5px 0px;
     font-family:'Courier New', Courier, monospace;
     color: rgb(218, 173, 129);
-}
-
-#nav_bar{
-    float: right;
-    margin: 10px;
-}
-
-#content_area{
-    display: block;
-    height: 85%;
-}
-
-#live_data{
-    width: 400px;
-    height: 335px;
-    float: left;
-    padding: 5px;
-    margin: 5px 0px 10px 5px;
-    background-color: rgb(35, 44, 80, .3);
-    border-radius: 10px;
-    
-}
-
-#live_data_header{
-    margin: 5px 0px;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: rgb(161, 80, 0);
-
-}
-
-#curr_weather{
-    float:left;
-    padding: 0px 10px;
-    margin: 0px;
-}
-
-#curr_weather li{
-    list-style-type: none;
-    margin-top: 5px;
-    font-family:'Courier New', Courier, monospace;
-}
-
-#curr_wind_heading, #curr_PM_2_5, #curr_PM_10, #curr_AQI{
-    margin: 5px 25px;
-} 
-
-#data_graphs{
-    float: left;
-}
-
-#graph_header{
-    float: left;
-    width: 70%;
-    margin: 10px 0px 0px 10px;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: rgb(161, 80, 0);
-}
-
-#graph_instructions{
-    float: left;
-    margin: 10px 0px 0px 20px;
-    font-family:'Courier New', Courier, monospace;
-
-}
-
-#buttons{
-    margin: 15px 0px;
-}
-
-#buttons li{
-    list-style-type: none;
-    background-color: rgb(218, 173, 129);
-    float: left;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 10px;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-}
-
-#buttons li:hover{
-    background-color: rgb(161, 80, 0);
-}
-
-#graph{
-    height: 400px;
-    width: 600px;
-    float: left;
-    margin: 10px 0px 0px 240px;
 }
 
 #index_button{
@@ -129,9 +40,59 @@ body{
     border-radius: 10px;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     float: right;
-    margin: 10px;
+    margin: 10px 20px;
 }
 
 #index_button:hover{
     background-color: rgb(161, 80, 0);
+}
+
+#data_graphs{
+    float: left;
+}
+
+#graph_instructions{
+    width: 100%;
+    margin: 10px 5px;
+    font-family:'Courier New', Courier, monospace;
+}
+
+#data_graphs{
+    width: 100%;
+}
+
+#data_graphs h4{
+    margin: 0px 5px;
+}
+
+#curr_weather_buttons, #daily_weather_buttons{
+    margin: 15px 0px;
+    width: 100%;
+    height: 5%;
+}
+
+#curr_weather_buttons li, #daily_weather_buttons li{
+    list-style-type: none;
+    background-color: rgb(218, 173, 129);
+    float: left;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 10px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+#curr_weather_buttons li:hover{
+    background-color: rgb(161, 80, 0);
+}
+
+#daily_weather_buttons li:hover{
+    background-color: rgb(161, 80, 0);
+}
+
+#graph{
+    height: 400px;
+    width: 600px;
+    float: left;
+    margin: 10px 0px 0px 240px;
 }

@@ -72,6 +72,7 @@ typedef struct weatherdata_t {
 } weatherdata_t;
 
 typedef struct dailydata_t {
+  String date;
   float high_temp;
   float low_temp;
   float avg_pressure;
@@ -358,6 +359,10 @@ void updateData() {
     float prevTotalRain = dailyData.total_rainRate;
     String prevWorstFireRating = dailyData.worst_fireSafetyRating;
     String prevWorstAQILabel = dailyData.worst_aqiLabel;
+
+    //get the previous day's date to attach to the data
+    DateTime prevDay = (now - TimeSpan(1, 0, 0, 0));
+    dailyData.date = String(prevDay.year()) + "-" + String(prevDay.month()) + "-" + String(prevDay.day());
 
     // store the previous day's values
     prevDailyData.high_temp = prevHighTemp;
@@ -665,7 +670,7 @@ void isr_rotation() {
  * Return: None
  */
  //Can't write directly to JSON because SD cards only allow for up to 3 character file extensions
- //CSV over text file because ensures more uniform formatting
+ //CSV chosen over text file because ensures more uniform formatting
 void writeToSD() {
   logFile = SD.open("log.csv", FILE_WRITE);
 
@@ -703,6 +708,9 @@ void writeToSD() {
 	logFile.print(data.rainRate);
   logFile.print(",");
 	logFile.print(data.fireSafetyRating);
+  logFile.print(",");
+
+  logFile.print(dailyData.date);
   logFile.print(",");
 
   logFile.print(dailyData.high_temp);
