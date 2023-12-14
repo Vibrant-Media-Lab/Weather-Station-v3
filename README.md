@@ -9,7 +9,7 @@ The goal of this project is to be transparent enough for beginners to implement,
 The sensors used in this project can track a variety of data. The following measurements are used in this project: 
 
 * **Temperature** in Celsius
-* **Pressure** in Pa
+* **Barometric Pressure** in Pa
 * **Humidity** in percent
 * **Particulate Matter (PM) 2.5** in micrograms per cubic meter
 * **Particulate Matter (PM) 10** in micrograms per cubic meter
