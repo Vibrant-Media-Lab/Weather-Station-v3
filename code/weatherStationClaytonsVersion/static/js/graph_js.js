@@ -236,7 +236,7 @@ function trackButtonClicks(){
     tempButton.addEventListener("click", (e) => { graphHourlyData(tempArray, "Temperature") });
 
     let pressureButton = document.getElementById("pressureButton");
-    pressureButton.addEventListener("click", (e) => { graphHourlyData(pressureArray, "Air Pressure") });
+    pressureButton.addEventListener("click", (e) => { graphHourlyData(pressureArray, "Barometric Pressure") });
 
     let humidityButton = document.getElementById("humidityButton");
     humidityButton.addEventListener("click", (e) => { graphHourlyData(humidityArray, "Humidity") });
@@ -274,7 +274,7 @@ function trackButtonClicks(){
     lowTempButton.addEventListener("click", (e) => { graphDailyData(lowTempArray, "Daily Low Temperature") });
 
     let avgPressureButton = document.getElementById("avgPressureButton");
-    avgPressureButton.addEventListener("click", (e) => { graphDailyData(avgPressureArray, "Daily Average Air Pressure") });
+    avgPressureButton.addEventListener("click", (e) => { graphDailyData(avgPressureArray, "Daily Average Barometric Pressure") });
 
     let highHumidityButton = document.getElementById("highHumidityButton");
     highHumidityButton.addEventListener("click", (e) => { graphDailyData(highHumidityArray, "Daily High Humidity") });   

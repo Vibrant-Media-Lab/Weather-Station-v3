@@ -73,7 +73,7 @@ function displayCurrentData(data) {
 
     let currPressure = document.createElement("li");
     currPressure.id = "curr_pressure";
-    currPressure.innerText = `Air Pressure: ${data[current_data_index]["pressure"]} Pa`;
+    currPressure.innerText = `Barometric Pressure: ${data[current_data_index]["pressure"]} Pa`;
     currWeather.appendChild(currPressure);
 
     let currHumidity = document.createElement("li");
@@ -150,7 +150,7 @@ function displayCurrentData(data) {
 
     let avgPressure = document.createElement("li");
     avgPressure.id = "avg_pressure";
-    avgPressure.innerText = `Average Air Pressure: ${data[current_data_index]["prev_day_avg_pressure"]} Pa`;
+    avgPressure.innerText = `Average Barometric Pressure: ${data[current_data_index]["prev_day_avg_pressure"]} Pa`;
     dailyWeather.appendChild(avgPressure);
 
     let highHumidity = document.createElement("li");
