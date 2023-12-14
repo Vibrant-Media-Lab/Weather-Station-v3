@@ -362,7 +362,7 @@ void updateData() {
 
     //get the previous day's date to attach to the data
     DateTime prevDay = (now - TimeSpan(1, 0, 0, 0));
-    dailyData.date = String(prevDay.year()) + "-" + String(prevDay.month()) + "-" + String(prevDay.day());
+    prevDailyData.date = String(prevDay.year()) + "-" + String(prevDay.month()) + "-" + String(prevDay.day());
 
     // store the previous day's values
     prevDailyData.high_temp = prevHighTemp;
@@ -710,26 +710,26 @@ void writeToSD() {
 	logFile.print(data.fireSafetyRating);
   logFile.print(",");
 
-  logFile.print(dailyData.date);
+  logFile.print(prevDailyData.date);
   logFile.print(",");
 
-  logFile.print(dailyData.high_temp);
+  logFile.print(prevDailyData.high_temp);
   logFile.print(",");
-  logFile.print(dailyData.low_temp);
+  logFile.print(prevDailyData.low_temp);
   logFile.print(",");
-  logFile.print(dailyData.avg_pressure);
+  logFile.print(prevDailyData.avg_pressure);
   logFile.print(",");
-  logFile.print(dailyData.high_humidity);
+  logFile.print(prevDailyData.high_humidity);
   logFile.print(",");
-  logFile.print(dailyData.high_aqi);
+  logFile.print(prevDailyData.high_aqi);
   logFile.print(",");
-  logFile.print(dailyData.worst_aqiLabel);
+  logFile.print(prevDailyData.worst_aqiLabel);
   logFile.print(",");
-  logFile.print(dailyData.avg_windSpeed);
+  logFile.print(prevDailyData.avg_windSpeed);
   logFile.print(",");
-  logFile.print(dailyData.total_rainRate);
+  logFile.print(prevDailyData.total_rainRate);
   logFile.print(",");
-  logFile.print(dailyData.worst_fireSafetyRating);
+  logFile.print(prevDailyData.worst_fireSafetyRating);
   
 
   logFile.println("");
