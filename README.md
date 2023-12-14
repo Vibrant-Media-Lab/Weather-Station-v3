@@ -86,3 +86,6 @@ The files for the final build can be found in `code\weatherStationClaytonsVersio
 *Graphs page of the website, allows users to interact with the historic stored data. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
 
 The `\static\` directory has three subdirectories containing the JavaScript, CSS, and libraries necessary to render the webpages. This folder should also be added to the MicroSD card. 
+
+### Component Tests
+The directory `\code\componentTests\` contains subdirectories with Arduino sketches to test the functionality of the various components included in the project individually. 
