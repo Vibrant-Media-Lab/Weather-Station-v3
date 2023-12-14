@@ -6,7 +6,6 @@ This weather station module is a compact, portable, and fully functioning weathe
 The goal of this project is to be transparent enough for beginners to implement, and for more knowledgable users to make changes to the source code and hardware. The project is open source, and as such all programs and instructions will be made publicly available without cost. 
 
 ## Weather data
----
 The sensors used in this project can track a variety of data. The following measurements are used in this project: 
 
 * **Temperature** in Celsius
@@ -35,9 +34,7 @@ The above values are measured every hour, and they are used to calculate the fol
 The data is logged with timestamps to a CSV file, stored on an SD card.
 
 ## Design Overview
----
 ### Dependencies/Inclusions
----
 * string.h
 * math.h
 * SoftwareSerial.h
@@ -56,25 +53,23 @@ The data is logged with timestamps to a CSV file, stored on an SD card.
 ---
 The core unit of this module is an Arduino Mega.
 
-**Ethernet Shield with MicroSD storage**
+**Ethernet Shield with MicroSD storage**  
 *Model: Ethernet Shield W5100(HanRun HR911105A 17/32)*
 
-**LCD Display**
+**LCD Display**  
 *Model: ADAFRUIT HD44780*
 
-##### Sensors
-
-**System Temperature and Barometric Pressure**
+**System Temperature and Barometric Pressure**  
 *Model: ADAFRUIT BMP280*
 
-**ExternalTemperature and Relative Humidity**
+**ExternalTemperature and Relative Humidity**  
 *Model: ADAFRUIT Si7021*
 
-**Air Quality Sensor and Breadboard Adapter Kit**
+**Air Quality Sensor and Breadboard Adapter Kit**  
 *Model: ADAFRUIT PMS5003*
 
-**Anemoeter and Wind Direction**
+**Anemoeter and Wind Direction**  
 *Model: DAVIS ANEMOMETER FOR VANTAGE PRO2*
 
-**Rain Fall**
+**Rain Fall**  
 *DAVIS AEROCONE COLLECTOR FOR VANTAGE PRO2*
