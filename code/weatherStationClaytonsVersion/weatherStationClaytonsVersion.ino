@@ -23,14 +23,14 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <LiquidCrystal_I2C.h>
-#include "RTClib.h"
+#include <RTClib.h>
+#include <Adafruit_PM25AQI.h>
 
 // Component Declarations //
-SoftwareSerial airQualitySerial(14, 15);
-
 Adafruit_Si7021 temperatureSensor = Adafruit_Si7021();
-
 Adafruit_BMP280 pressureSensor;
+Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
+PM25_AQI_Data aqi_data;
 
 // DISPLAY
 LiquidCrystal_I2C lcd(0x27, 20, 4); //Specifies the display to have 4 rows with 20 characters per row. These numbers should not be reduced.
@@ -46,24 +46,13 @@ const int displayScreens = 4; //Specifies the number of different display screen
 
 #define REQ_BUF_SZ   20   // Used for handling GET requests from clients
 
-typedef struct pms5003data {
-  uint16_t framelen;
-  uint16_t pm10_standard, pm25_standard, pm100_standard;
-  uint16_t pm10_env, pm25_env, pm100_env;
-  uint16_t particles_03um, particles_05um, particles_10um, particles_25um, particles_50um, particles_100um;
-  uint16_t unused;
-  uint16_t checksum;
-} airqualitydata_t;
-
-SoftwareSerial aqSerial(9, 10);
-
 typedef struct weatherdata_t {
   float temperature;
   float pressure;
   float humidity;
-  float pm25;
-  float pm10;
-  float aqi;
+  float aqi_pm25;
+  float aqi_pm10;
+  float airQuality;
   float windSpeed;
   int windHeading;
   float rainRate;
@@ -85,7 +74,6 @@ typedef struct dailydata_t {
 } dailydata_t;
 
 // Global Data Variables //
-airqualitydata_t aq;
 weatherdata_t data;
 dailydata_t dailyData;
 dailydata_t prevDailyData;
@@ -184,7 +172,7 @@ void beginSerial() {
     delay(10);
   }
 
-  aqSerial.begin(9600);
+  Serial3.begin(9600);
   while(!aqSerial) {
   	delay(10);
   }
@@ -505,20 +493,7 @@ void updateHumidity() {
   data.humidity = temperatureSensor.readHumidity();
 }
 
-/**
- * Updates the global air quality data, using the PM2.5 sensor
- * Arguments: None
- * Return: None
- */
-void updateParticulateMatter() {
-  if(readPMSdata(&aqSerial)) {
-    data.pm25 = aq.pm25_standard;
-    data.pm10 = aq.pm10_standard;
-	}
-}
-
 void updateAirQualityIndex(){
-  int aqi_pm10, aqi_pm25;
   //char[] aqiLabel;
   // AQI breakpoints and corresponding concentrations for PM10
   double breakpoints_pm10[] = {0, 54, 154, 254, 354, 424, 504, 604};
@@ -530,89 +505,39 @@ void updateAirQualityIndex(){
 
   // Calculate AQI for PM10
   for (int i = 0; i < 7; ++i) {
-      if (data.pm10 <= breakpoints_pm10[i + 1]) {
-          aqi_pm10 = (int)(((aqi_values_pm10[i + 1] - aqi_values_pm10[i]) / (breakpoints_pm10[i + 1] - breakpoints_pm10[i])) * (data.pm10 - breakpoints_pm10[i]) + aqi_values_pm10[i]);
+      if (aqi_data.pm10_standard <= breakpoints_pm10[i + 1]) {
+          data.aqi_pm10 = (int)(((aqi_values_pm10[i + 1] - aqi_values_pm10[i]) / (breakpoints_pm10[i + 1] - breakpoints_pm10[i])) * (aqi_data.pm10_standard - breakpoints_pm10[i]) + aqi_values_pm10[i]);
           break;
       }
   }
 
   // Calculate AQI for PM2.5
   for (int i = 0; i < 7; ++i) {
-      if (data.pm25 <= breakpoints_pm25[i + 1]) {
-          aqi_pm25 = (int)(((aqi_values_pm25[i + 1] - aqi_values_pm25[i]) / (breakpoints_pm25[i + 1] - breakpoints_pm25[i])) * (data.pm25 - breakpoints_pm25[i]) + aqi_values_pm25[i]);
+      if (aqi_data.pm25_standard <= breakpoints_pm25[i + 1]) {
+          data.aqi_pm25 = (int)(((aqi_values_pm25[i + 1] - aqi_values_pm25[i]) / (breakpoints_pm25[i + 1] - breakpoints_pm25[i])) * (aqi_data.pm25_standard - breakpoints_pm25[i]) + aqi_values_pm25[i]);
           break;
       }
   }
 
-  if(aqi_pm10 > aqi_pm25){
-    data.aqi = aqi_pm10;
+  if(data.aqi_pm10 > data.aqi_pm25){
+    data.airQuality = data.aqi_pm10;
   }else{
-    data.aqi = aqi_pm25;
+    data.airQuality = data.aqi_pm25;
   }
 
-  if (data.aqi <= 50) {
+  if (data.airQuality <= 50) {
         data.aqiLabel = "Good";
-    } else if (data.aqi <= 100) {
+    } else if (data.airQuality <= 100) {
         data.aqiLabel = "Moderate";
-    } else if (data.aqi <= 150) {
+    } else if (data.airQuality <= 150) {
         data.aqiLabel = "Unhealthy for Sensitive Groups";
-    } else if (data.aqi <= 200) {
+    } else if (data.airQuality <= 200) {
         data.aqiLabel = "Unhealthy";
-    } else if (data.aqi <= 300) {
+    } else if (data.airQuality <= 300) {
         data.aqiLabel = "Very Unhealthy";
     } else {
         data.aqiLabel = "Hazardous";
     }
-}
-
-bool readPMSdata(Stream *s) {
-  if (! s->available()) {
-    return false;
-  }
-  
-  // Read a byte at a time until we get to the special '0x42' start-byte
-  if (s->peek() != 0x42) {
-    s->read();
-    return false;
-  }
- 
-  // Now read all 32 bytes
-  if (s->available() < 32) {
-    return false;
-  }
-    
-  uint8_t buffer[32];    
-  uint16_t sum = 0;
-  s->readBytes(buffer, 32);
- 
-  // get checksum ready
-  for (uint8_t i=0; i<30; i++) {
-    sum += buffer[i];
-  }
- 
-  /* debugging
-  for (uint8_t i=2; i<32; i++) {
-    Serial.print("0x"); Serial.print(buffer[i], HEX); Serial.print(", ");
-  }
-  Serial.println();
-  */
-  
-  // The data comes in endian'd, this solves it so it works on all platforms
-  uint16_t buffer_u16[15];
-  for (uint8_t i=0; i<15; i++) {
-    buffer_u16[i] = buffer[2 + i*2 + 1];
-    buffer_u16[i] += (buffer[2 + i*2] << 8);
-  }
- 
-  // put it into a nice struct :)
-  memcpy((void *)&aq, (void *)buffer_u16, 30);
- 
-  if (sum != aq.checksum) {
-    Serial.println("Checksum failure");
-    return false;
-  }
-  // success!
-  return true;
 }
 
 /**
