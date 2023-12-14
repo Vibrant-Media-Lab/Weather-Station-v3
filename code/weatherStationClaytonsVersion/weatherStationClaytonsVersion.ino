@@ -14,7 +14,7 @@
 #include <SoftwareSerial.h>
 #include <Ethernet.h>
 #include <SD.h>
-#include <ArduinoJson.h>
+#include <ArduinoJson.h> 
 
 // Component Includes //
 #include <Wire.h>
@@ -95,6 +95,12 @@ dailydata_t prevDailyData;
 int windInterruptCounter;
 int windInterruptBounce;
 
+float totalWindSpeed = 0;
+int windSpeedMeasurementsCount = 0;
+volatile float windHr = 0;
+volatile float windHrTotal = 0;
+int windHrCount = 0;
+
 int raininterruptCounter;
 int rainInterruptBounce;
 
@@ -144,7 +150,8 @@ void setup() {
   beginRTC();
   prepareLCD();
 
-  attachInterrupt(digitalPinToInterrupt(rainRatePin), rainTip, FALLING);
+  attachInterrupt(digitalPinToInterrupt(rainRatePin), rainTip, FALLING); // whenever rain causes a tip, this interrupt is called
+  attachInterrupt(digitalPinToInterrupt(windSpeedPin), isr_rotation, FALLING); // whenever wind causes a rotation, this interrupt is called
 
   updateData();
 }
@@ -312,6 +319,7 @@ void printDirectory(File dir, int numTabs) {
 
 /**
 * Interrupt function to be called whenever the rain gauge is tipped, updates the rain fall totals
+* rainfall per day = rain24hr
 **/
 void rainTip(){
   if(millis() - lastRainTip > rainBounceMin){
@@ -322,9 +330,33 @@ void rainTip(){
   }
 }
 
+/**
+* On interupt, increments the wind interrupt rotation count
+* Arguments: None
+* Return: None
+* CALLED EVERY TIME THE WIND CAUSES A SINGLE ROTATION (not hourly)
+*/
+void isr_rotation() {
+  if(millis() - windInterruptBounce > 15) {
+    windInterruptCounter++;
+    windInterruptBounce = millis();
+  }
+
+  // TODO: add average wind through the hour
+  windHr += windHrCount * (3600.0 / 8000.0);
+  windHrTotal += windHr;
+  windHrCount++;
+  
+  
+  float totalWindSpeed = 0;
+  int windSpeedMeasurementsCount = 0;
+  
+}
+
 // Updata Data fields //
 
 /**
+ * CALLED EVERY HOUR IN loop()
  * Updates the global data struct
  * Arguments: None
  * Return: None
@@ -346,9 +378,10 @@ void updateData() {
 
   now = rtc.now();
 
-  // at midnight, move the previous day's values to the stored struct so they stay consistent throughout the next day, then clear the updating struct to calculate the new days values
+  // at midnight, move the previous day's values to the stored struct so they stay consistent 
+  // throughout the next day, then clear the updating struct to calculate the new days values
+  
   if (now.hour() == 0){
-
     // copy the end of day values of the daily data
     float prevHighTemp = dailyData.high_temp;
     float prevLowTemp = dailyData.low_temp;
@@ -385,6 +418,10 @@ void updateData() {
     dailyData.total_rainRate = data.rainRate;
     dailyData.worst_fireSafetyRating = data.fireSafetyRating;
     dailyData.worst_aqiLabel = data.aqiLabel;
+
+    // reset wind speed on the hour. Doesn't follow the above style, but easier to read in a rough draft.
+    totalWindSpeed - 0;
+    windSpeedMeasurementsCount = 0;
 
   }
   else {
@@ -608,7 +645,18 @@ void updateWindSpeed() {
   }
   
   detachInterrupt(digitalPinToInterrupt(windSpeedPin));
-  data.windSpeed = windInterruptCounter * .75;
+  data.windSpeed = windInterruptCounter * .75; // current wind speed
+
+  // accumulate total wind speed and count measurements (this function is called once per hour)
+  totalWindSpeed += windHr;
+  windSpeedMeasurementsCount++;
+  
+}
+
+float calculateAverageWindSpeed() 
+{
+  if (windSpeedMeasurementsCount == 0) return 0;
+  return windHrTotal / windSpeedMeasurementsCount;
 }
 
 void updateRainRate(){
@@ -649,17 +697,7 @@ void updateFireSafetyRating() {
  }
 }
 
-/**
-* On interupt, increments the wind interrupt rotation count
-* Arguments: None
-* Return: None
-*/
-void isr_rotation() {
-  if(millis() - windInterruptBounce > 15) {
-    windInterruptCounter++;
-    windInterruptBounce = millis();
-  }
-}
+
 
 
 // Data Packaging and Output //
