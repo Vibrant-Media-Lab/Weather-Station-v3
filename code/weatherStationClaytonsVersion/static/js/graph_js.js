@@ -153,22 +153,15 @@ function checkAvailability(){
 }
 */
 
-// function to create the graphs on the page, uses the ApexCharts library
+// functions to create the graphs on the page, uses the ApexCharts library
 // arguments: array of data type to make graph from, string of data type to use for axis label and title
 // returns: nothing
-function graphData(dataArray, dataType){
+function graphHourlyData(dataArray, dataType){
     //console.log(dataArray);
 
     // clear the previous graph that was displayed, if any
     graph = document.getElementById('graph');
     graph.innerHTML = "";
-    
-
-    // the data does not have timestamps, so instead create array of counts for the number of readings taken
-    let x_data = [];
-    for(let i = 1; i <= dataArray.length; i ++){
-        x_data.push(i);
-    }
 
     // set the parameters of the chart
     var options = {
@@ -180,7 +173,35 @@ function graphData(dataArray, dataType){
           data: dataArray
         }],
         xaxis: {
-          categories: x_data
+          categories: timestampArray
+        }
+      }
+
+      // create the chart in the graph div using the parameters defined above
+      var chart = new ApexCharts(graph, options);
+      
+      // draw the chart
+      chart.render();
+}
+
+function graphDailyData(dataArray, dataType){
+    //console.log(dataArray);
+
+    // clear the previous graph that was displayed, if any
+    graph = document.getElementById('graph');
+    graph.innerHTML = "";
+
+    // set the parameters of the chart
+    var options = {
+        chart: {
+          type: 'line'
+        },
+        series: [{
+          name: dataType,
+          data: dataArray
+        }],
+        xaxis: {
+          categories: dateArray
         }
       }
 
@@ -196,6 +217,8 @@ function graphData(dataArray, dataType){
 // returns: nothing
 function trackButtonClicks(){
 
+    // for each "button", add an event listener that calls the graphData function with the correct array and data type
+
     // reminder of the IDs used for each element in the HTML
     /*
     <li id="tempButton">Temperature</li>
@@ -208,34 +231,61 @@ function trackButtonClicks(){
     <li id="windHeadingButton">Wind Heading</li>
     <li id="rainRateButton">Rain Rate</li> 
     */
-   
-    // for each "button", add an event listener that calls the graphData function with the correct array and data type
 
     let tempButton = document.getElementById("tempButton");
-    tempButton.addEventListener("click", (e) => { graphData(tempArray, "Temperature") });
+    tempButton.addEventListener("click", (e) => { graphHourlyData(tempArray, "Temperature") });
 
     let pressureButton = document.getElementById("pressureButton");
-    pressureButton.addEventListener("click", (e) => { graphData(pressureArray, "Air Pressure") });
+    pressureButton.addEventListener("click", (e) => { graphHourlyData(pressureArray, "Air Pressure") });
 
     let humidityButton = document.getElementById("humidityButton");
-    humidityButton.addEventListener("click", (e) => { graphData(humidityArray, "Humidity") });
+    humidityButton.addEventListener("click", (e) => { graphHourlyData(humidityArray, "Humidity") });
 
     let aqiButton = document.getElementById("aqiButton");
-    aqiButton.addEventListener("click", (e) => { graphData(aqiArray, "AQI") });
+    aqiButton.addEventListener("click", (e) => { graphHourlyData(aqiArray, "AQI") });
 
     let pm2_5Button = document.getElementById("airQuality2.5Button");
-    pm2_5Button.addEventListener("click", (e) => { graphData(pm2_5Array, "PM 2.5")});
+    pm2_5Button.addEventListener("click", (e) => { graphHourlyData(pm2_5Array, "PM 2.5")});
 
     let pm10Button = document.getElementById("airQuality10Button");
-    pm10Button.addEventListener("click", (e) => { graphData(pm10Array, "PM 10")});
+    pm10Button.addEventListener("click", (e) => { graphHourlyData(pm10Array, "PM 10")});
 
     let windSpeedButton = document.getElementById("windSpeedButton");
-    windSpeedButton.addEventListener("click", (e) => { graphData(windSpeedArray, "Wind Speed") });
-
-    let windHeadingButton = document.getElementById("windHeadingButton");
-    windHeadingButton.addEventListener("click", (e) => { graphData(windHeadingArray, "Wind Heading") });
+    windSpeedButton.addEventListener("click", (e) => { graphHourlyData(windSpeedArray, "Wind Speed") });
 
     let rainRateButton = document.getElementById("rainRateButton");
-    rainRateButton.addEventListener("click", (e) => { graphData(rainRateArray, "Rain Rate") });
-    
+    rainRateButton.addEventListener("click", (e) => { graphHourlyData(rainRateArray, "Rain Rate") });
+
+    // reminder of the IDs used for each element in the HTML
+    /*
+    <li id="highTempButton">High Temperature</li>
+    <li id="lowTempButton">Low Temperature</li>
+    <li id="avgPressureButton">Average Air Pressure</li>
+    <li id="highHumidityButton">High Humidity</li>
+    <li id="highAqiButton">High AQI</li>
+    <li id="avgWindSpeedButton">Average Wind Speed</li>
+    <li id="totRainButton">Total Rain Fall</li>
+    */
+
+    let highTempButton = document.getElementById("highTempButton");
+    highTempButton.addEventListener("click", (e) => { graphDailyData(highTempArray, "Daily High Temperature") });
+
+    let lowTempButton = document.getElementById("lowTempButton");
+    lowTempButton.addEventListener("click", (e) => { graphDailyData(lowTempArray, "Daily Low Temperature") });
+
+    let avgPressureButton = document.getElementById("avgPressureButton");
+    avgPressureButton.addEventListener("click", (e) => { graphDailyData(avgPressureArray, "Daily Average Air Pressure") });
+
+    let highHumidityButton = document.getElementById("highHumidityButton");
+    highHumidityButton.addEventListener("click", (e) => { graphDailyData(highHumidityArray, "Daily High Humidity") });   
+
+    let highAqiButton = document.getElementById("highAqiButton");
+    highAqiButton.addEventListener("click", (e) => { graphDailyData(highAqiArray, "Daily High AQI") });
+
+    let avgWindSpeedButton = document.getElementById("avgWindSpeedButton");
+    avgWindSpeedButton.addEventListener("click", (e) => { graphDailyData(avgWindSpeedArray, "Daily Average Wind Speed") });    
+
+    let totRainButton = document.getElementById("totRainButton");
+    totRainButton.addEventListener("click", (e) => { graphDailyData(totRainFallArray, "Daily Total Rain Fall") });
+
 }
