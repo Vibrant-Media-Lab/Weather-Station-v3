@@ -50,7 +50,6 @@ The data is logged with timestamps to a CSV file, stored on an SD card.
 * RTClib.h
 
 ### Components
----
 The core unit of this module is an Arduino Mega.
 
 **Ethernet Shield with MicroSD storage**  
