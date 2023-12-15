@@ -88,10 +88,11 @@ The files for the final build can be found in `code\weatherStationClaytonsVersio
 * **ppparse.js** *Locally stored JavaScript file of the Papa Parse library, which is used to parse the CSV file to an array of JSON objects that can be used by the other code. This library loads relatively quickly, but it is still recommended to use the version imported from the Internet if possible. If not, this file should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
 
 ### Component Tests
-The directory `\code\componentTests\` contains subdirectories with Arduino sketches to test the functionality of the various components included in the project individually. 
+The directory `\code\componentTests\` contains subdirectories with Arduino sketches to individually test the functionality of the various components included in the project. 
 
 ## Future Improvements
 As this is an open source project, anyone is able to use this code to develop their own weather station, and we welcome feedback and suggestions on the current product!
 As it stands, there are a few known improvements that can be made to this build: 
 * The readings of the rain fall, wind speed, wind heading, and air quality data have not be thoroughly tested, and may require debugging. 
 * The code has gone through many iterations, and as such there may be redundant or unnecessary code in the Arduino sketch that can be cleaned up.
+* The component tests could be improved upon to test the specific actions and data collection required by the full project build, instead of just checking the general functionality of the component. 
