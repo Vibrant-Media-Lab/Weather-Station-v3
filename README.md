@@ -5,7 +5,7 @@ This weather station module is a compact, portable, and fully functioning weathe
 
 The goal of this project is to be transparent enough for beginners to implement, and for more knowledgable users to make changes to the source code and hardware. The project is open source, and as such all programs and instructions will be made publicly available without cost. 
 
-## Weather data
+## Weather Data
 The sensors used in this project can track a variety of data. The following measurements are used in this project: 
 
 * **Temperature** in Celsius
@@ -82,7 +82,16 @@ The files for the final build can be found in `code\weatherStationClaytonsVersio
 * **graphs.htm:** *Graphs page of the website, allows users to interact with the historic stored data. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
 * **i_style.css:** *Stylesheet for `index.htm`. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
 * **g_style.css:** *Stylesheet for `graphs.htm`. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
-* **index.js:** *JavaScript file for `index.htm` which handles the CSV file to display the most recent data.*
+* **index_js.js:** *JavaScript file for `index.htm`, parses the CSV file to display the most recent hourly and daily data, and reloads the page once an hour to update the data. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **graph_js.js** *JavaScript file for `graphs.htm`, converts the data into arrays to be used as inputs for line graphs. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **charts.js** *Locally stored JavaScript file of the ApexCharts library, which is used to create the graphs. This library is quite large, so if the weather station is connected to the Internet and can simply import the library, that is recommended. If not, this file should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **ppparse.js** *Locally stored JavaScript file of the Papa Parse library, which is used to parse the CSV file to an array of JSON objects that can be used by the other code. This library loads relatively quickly, but it is still recommended to use the version imported from the Internet if possible. If not, this file should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
 
 ### Component Tests
 The directory `\code\componentTests\` contains subdirectories with Arduino sketches to test the functionality of the various components included in the project individually. 
+
+## Future Improvements
+As this is an open source project, anyone is able to use this code to develop their own weather station, and we welcome feedback and suggestions on the current product!
+As it stands, there are a few known improvements that can be made to this build: 
+* The readings of the rain fall, wind speed, wind heading, and air quality data have not be thoroughly tested, and may require debugging. 
+* The code has gone through many iterations, and as such there may be redundant or unnecessary code in the Arduino sketch that can be cleaned up.
