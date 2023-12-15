@@ -173,7 +173,7 @@ void beginSerial() {
   }
 
   Serial3.begin(9600);
-  while(!aqSerial) {
+  while(!Serial3) {
   	delay(10);
   }
 }
@@ -358,7 +358,6 @@ void updateData() {
   updateWindHeading();
   updateWindSpeed();
   updateRainRate();
-  updateParticulateMatter();
   updateAirQualityIndex();
   updateFireSafetyRating();
 
@@ -401,7 +400,7 @@ void updateData() {
     dailyData.low_temp = data.temperature;
     dailyData.avg_pressure = data.pressure;
     dailyData.high_humidity = data.humidity;
-    dailyData.high_aqi = data.aqi;
+    dailyData.high_aqi = data.airQuality;
     dailyData.avg_windSpeed = data.windSpeed;
     dailyData.total_rainRate = data.rainRate;
     dailyData.worst_fireSafetyRating = data.fireSafetyRating;
@@ -436,8 +435,8 @@ void updateData() {
     }
 
     // worst air quality and AQI label
-    if (data.aqi > dailyData.high_aqi){
-      dailyData.high_aqi = data.aqi;
+    if (data.airQuality > dailyData.high_aqi){
+      dailyData.high_aqi = data.airQuality;
       dailyData.worst_aqiLabel = data.aqiLabel;
     }
 
@@ -656,11 +655,11 @@ void writeToSD() {
   logFile.print(",");
 	logFile.print(data.humidity);
   logFile.print(",");
-  logFile.print(data.pm25);
+  logFile.print(data.aqi_pm25);
   logFile.print(",");
-  logFile.print(data.pm10);
+  logFile.print(data.aqi_pm10);
   logFile.print(",");
-  logFile.print(data.aqi);
+  logFile.print(data.airQuality);
   logFile.print(",");
   logFile.print(data.aqiLabel);
   logFile.print(",");
@@ -885,7 +884,7 @@ void updateDisplay() {
       lcd.setCursor(0,2);
       lcd.print("Pressure: "); lcd.print(data.pressure); lcd.print(" hectoPascals");
       lcd.setCursor(0,3);
-      lcd.print("Air Quality: "); lcd.print(data.aqi); lcd.print( "mg/m^2");
+      lcd.print("Air Quality: "); lcd.print(data.airQuality); lcd.print( "mg/m^2");
       break;
     
     //Wind & rain
