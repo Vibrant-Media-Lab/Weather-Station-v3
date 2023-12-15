@@ -76,16 +76,13 @@ The core unit of this module is an Arduino Mega.
 ## Files
 ### Final Build
 The files for the final build can be found in `code\weatherStationClaytonsVersion\`:
-* **weatherStationClaytonsVersion.ino**
-*The complete Arduino sketch to be uploaded. Collects data from the sensors and stores them to an onboard MicroSD card. Also contains the web server capabilites for handling clients*
-* **log.csv**
-*The log file which hourly and daily data is stored to with timestamps*
-* **index.htm**
-*Homepage of the website which shows the current hourly data and the previous day's roundup. Should be stored on the MicroSD card to be accessed and served to clients by the Arduino sketch*
-* **graphs.htm**
-*Graphs page of the website, allows users to interact with the historic stored data. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
-
-The `\static\` directory has three subdirectories containing the JavaScript, CSS, and libraries necessary to render the webpages. This folder should also be added to the MicroSD card. 
+* **weatherStationClaytonsVersion.ino:** *The complete Arduino sketch to be uploaded. Collects data from the sensors and stores them to an onboard MicroSD card. Also contains the web server capabilites for handling clients*
+* **log.csv:** *The log file which hourly and daily data is stored to with timestamps*
+* **index.htm:** *Homepage of the website which shows the current hourly data and the previous day's roundup. Should be stored on the MicroSD card to be accessed and served to clients by the Arduino sketch*
+* **graphs.htm:** *Graphs page of the website, allows users to interact with the historic stored data. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **i_style.css:** *Stylesheet for `index.htm`. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **g_style.css:** *Stylesheet for `graphs.htm`. Should be stored on the MircoSD card to be accessed and served to clients by the Arduino sketch*
+* **index.js:** *JavaScript file for `index.htm` which handles the CSV file to display the most recent data.*
 
 ### Component Tests
 The directory `\code\componentTests\` contains subdirectories with Arduino sketches to test the functionality of the various components included in the project individually. 
